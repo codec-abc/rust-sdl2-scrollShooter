@@ -1,9 +1,11 @@
+#[allow(dead_code)]
 pub struct Point
 {
     x : u32,
     y : u32
 }
 
+#[allow(dead_code)]
 pub fn new() -> Point
 {
     Point{x:0, y:0}
@@ -11,6 +13,7 @@ pub fn new() -> Point
 
 impl Point
 {
+    #[allow(dead_code)]
     fn distance(&self, p : &Point ) -> f32
     {
         let x_diff = self.x - p.x;

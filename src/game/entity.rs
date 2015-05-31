@@ -1,102 +1,139 @@
-use sdl2::event::Event;
-use sdl2::event::EventType;
+use std::fs::File;
 
-use sdl2::pixels::Color;
-use sdl2::keycode::KeyCode;
+use image::ImageFormat;
+use image::load;
+
+use sdl2::event::Event;
 use sdl2::surface::Surface;
-use sdl2::SdlResult;
 use sdl2::render::Renderer;
 use sdl2::render::RenderDrawer;
 use sdl2::render;
+use sdl2::pixels::PixelFormatEnum;
 
 pub trait Entity
 {
-    fn ProcessEvent(&self, event : &Event);
-    fn Render(&self, mut drawer : RenderDrawer);
-    fn GetName(&self) -> &str;
+    fn process_event(&self, event : &Event);
+    fn render(&self, mut drawer : RenderDrawer);
+    fn get_name(&self) -> &str;
 }
 
-pub struct LoggerEventEntity;
+pub struct LoggerEventEntity
+{
+    is_logging :bool,
+}
 
 impl Entity for LoggerEventEntity
 {
-    fn ProcessEvent(&self, event : &Event)
+    fn process_event(&self, event : &Event)
     {
-        println!("{:?}", event);
+        if self.is_logging
+        {
+            println!("{:?}", event);
+        }
     }
 
-    fn Render(&self, mut drawer : RenderDrawer)
+    #[allow(unused_variables)]
+    fn render(&self, drawer : RenderDrawer)
     {
 
     }
 
-    fn GetName(&self) -> &str
+    fn get_name(&self) -> &str
     {
         &"Logger"
     }
 }
 
-pub fn createLoggerEventEntity() -> Box<Entity>
+impl LoggerEventEntity
 {
-    let x = LoggerEventEntity;
+    fn new(is_logging : bool) -> LoggerEventEntity
+    {
+        LoggerEventEntity{is_logging : is_logging}
+    }
+}
+
+pub fn create_logger_event_entity() -> Box<Entity>
+{
+    let x = LoggerEventEntity::new(false);
     Box::new(x)
 }
 
 struct PlayerEntity
 {
-    isAlive : bool,
+    #[allow(dead_code)]
+    is_alive : bool,
     texture : Option<render::Texture>,
 }
 
 impl Entity for PlayerEntity
 {
-    fn ProcessEvent(&self, event : &Event)
+    #[allow(unused_variables)]
+    fn process_event(&self, event : &Event)
     {
 
     }
 
-    fn Render(&self, mut drawer : RenderDrawer)
+    fn render(&self, mut drawer : RenderDrawer)
     {
         match self.texture
         {
-            Some(ref textureValue) =>
+            Some(ref texture_value) =>
             {
-                drawer.copy(textureValue, None, None)
+                drawer.copy(texture_value, None, None)
             }
             _ => {}
         }
 
     }
 
-    fn GetName(&self) -> &str
+    fn get_name(&self) -> &str
     {
         &"Player"
     }
 }
 
-pub fn createPlayerEntity(renderer : &Renderer) -> Box<Entity>
+pub fn create_player_entity(renderer : &Renderer) -> Box<Entity>
 {
-    let surface = Surface::load_bmp("../scrollShooter/test.bmp");
-    let mut entity = PlayerEntity{isAlive: true, texture: None};
-    match surface
-    {
-        Ok(ref v) =>
-        {
-            let texResult = renderer.create_texture_from_surface(v);
-            match texResult
-            {
-                Ok(v2) =>
-                {
-                    entity.texture = Some(v2);
-                }
-                _ => { }
-            }
+    let mut entity = PlayerEntity{is_alive: true, texture: None};
 
-        }
-        Err(e) =>
+
+    let f = File::open("../scrollShooter/res/PNG/playerShip1_blue.png");
+    match f
+    {
+        Ok(value) =>
         {
-            println!("Error loading texture {}", e);
+            let image_result = load(value, ImageFormat::PNG);
+            match image_result
+            {
+                Ok(img_value) =>
+                {
+                    let im_rgba = img_value.to_rgba();
+                    let width = im_rgba.width();
+                    let height = im_rgba.height();
+                    let mut pixels = im_rgba.into_raw();
+                    let format = PixelFormatEnum::RGBA8888;
+                    let surface = Surface::from_data(&mut pixels, width, height, width * 4, format);
+                    match surface
+                    {
+                        Ok(ref surf_value) =>
+                        {
+                            let texture_result = renderer.create_texture_from_surface(surf_value);
+                            match texture_result
+                            {
+                                Ok(v2) =>
+                                {
+                                    entity.texture = Some(v2);
+                                }
+                                _ => {}
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+                _ => {println!("fail to open file as an image");}
+            }
         }
+        _ => {println!("fail to load file")}
     }
     Box::new(entity)
 }

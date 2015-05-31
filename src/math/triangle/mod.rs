@@ -1,5 +1,6 @@
 use super::point::Point;
 
+#[allow(dead_code)]
 pub struct Triangle
 {
     pub p1 : Point,
@@ -7,6 +8,7 @@ pub struct Triangle
     pub p3 : Point
 }
 
+#[allow(dead_code)]
 pub fn new (p1 : Point, p2 : Point, p3 : Point) -> Triangle
 {
     Triangle
@@ -19,6 +21,8 @@ pub fn new (p1 : Point, p2 : Point, p3 : Point) -> Triangle
 
 impl Triangle
 {
+    #[allow(dead_code)]
+    #[allow(unused_variables)]    
     fn interset(&self, t : &Triangle) -> bool
     {
         true

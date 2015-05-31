@@ -1,11 +1,7 @@
 extern crate sdl2;
+extern crate image;
 
 use sdl2::keycode::KeyCode;
-use sdl2::surface;
-
-use sdl2::surface::Surface;
-use sdl2::SdlResult;
-use sdl2::render;
 
 mod math;
 mod game;
@@ -20,14 +16,15 @@ pub fn main()
         .build()
         .unwrap();
 
-    let mut renderer = window.renderer().build().unwrap();
+    let renderer = window.renderer().build().unwrap();
     let mut running = true;
-    let mut game = game::game::buildGame(renderer);
+    let mut game = game::game::build_game(renderer);
 
-    game.Init();
+    game.init();
+
     while running
     {
-        game.ProcessFrameBeginEvent();
+        game.process_frame_begin_event();
         for event in sdl_context.event_pump().poll_iter()
         {
             use sdl2::event::Event;
@@ -39,10 +36,10 @@ pub fn main()
                 },
                 _ =>
                 {
-                    game.ProcessEvent(&event);
+                    &game.process_event(&event);
                 }
             }
         }
-        game.ProcessFrameEndEvent();
+        game.process_frame_end_event();
     }
 }
