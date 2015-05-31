@@ -1,0 +1,7 @@
+[package]
+name = "scrollShooter"
+version = "0.1.0"
+authors = ["codec"]
+
+[dependencies]
+sdl2 = "0.4.0"
