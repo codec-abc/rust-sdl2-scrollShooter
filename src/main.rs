@@ -1,6 +1,5 @@
 extern crate sdl2;
 
-use sdl2::pixels::Color;
 use sdl2::keycode::KeyCode;
 use sdl2::surface;
 
@@ -23,46 +22,12 @@ pub fn main()
 
     let mut renderer = window.renderer().build().unwrap();
     let mut running = true;
-    let game = game::game::buildGame();
+    let mut game = game::game::buildGame(renderer);
 
-    let surface = Surface::load_bmp("../scrollShooter/test.bmp");
-    let mut texture : Option<render::Texture> = None;
-
-
-    {
-        let mut drawer = renderer.drawer();
-        drawer.set_draw_color(Color::RGB(0, 0, 0));
-        drawer.clear();
-        drawer.present();
-    }
-
-    match surface
-    {
-        Ok(ref v) =>
-        {
-            let w = renderer.create_texture_from_surface(v);
-            match w
-            {
-                Ok(v2) =>
-                {
-                    texture = Some(v2);
-                }
-                _ => { }
-            }
-
-        }
-        Err(e) =>
-        {
-            println!("Error loading texture {}", e);
-        }
-    }
-
+    game.Init();
     while running
     {
-        {
-            let mut drawer = renderer.drawer();
-            drawer.clear();
-        }
+        game.ProcessFrameBeginEvent();
         for event in sdl_context.event_pump().poll_iter()
         {
             use sdl2::event::Event;
@@ -74,21 +39,10 @@ pub fn main()
                 },
                 _ =>
                 {
-                    &game.ProcessEvent(&event);
+                    game.ProcessEvent(&event);
                 }
             }
         }
-        {
-            let mut drawer = renderer.drawer();
-            match texture
-            {
-                Some(ref v) =>
-                {
-                    drawer.copy(&v, None, None);
-                }
-                _ => {}
-            }
-            drawer.present();
-        }
+        game.ProcessFrameEndEvent();
     }
 }
